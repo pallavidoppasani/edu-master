@@ -30,9 +30,16 @@ import Contact from './pages/Contact';
 import Courses from './pages/Courses';
 import { Toaster } from "@/components/ui/sonner"
 
+// Top-level application component.
+// Responsibilities:
+// - Provide authentication and progress context to the whole app via providers.
+// - Configure client-side routing for public and protected pages.
+// - Render global UI utilities (Toaster for notifications).
 function App() {
   return (
+    // AuthProvider exposes user and auth helpers (login/register/logout) to the tree
     <AuthProvider>
+      {/* ProgressProvider stores lightweight client-side progress state (localStorage-backed) */}
       <ProgressProvider>
         <Router>
           <Routes>
@@ -76,6 +83,7 @@ function App() {
               <Route path="/admin/settings" element={<SystemSettings />} />
             </Route>
           </Routes>
+          {/* Global toaster for ephemeral notifications across the app */}
           <Toaster />
         </Router>
       </ProgressProvider>

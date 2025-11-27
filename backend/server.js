@@ -1,3 +1,10 @@
+// Backend server for EduMaster
+// - Express app providing REST API endpoints for authentication, courses, students,
+//   instructors, quizzes, admin operations and analytics.
+// - Uses Prisma as ORM to interact with a PostgreSQL database (Neon recommended).
+// - JWT based authentication with middleware `auth` and role-based `authorize` checks.
+// - This file wires routes and contains route handlers for commonly used operations.
+// NOTE: For maintainability consider splitting routes into separate modules (auth, student, instructor, admin).
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

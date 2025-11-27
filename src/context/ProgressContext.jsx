@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// ProgressContext stores lightweight, client-side course progress.
+// It persists a small structure in localStorage (`courseProgress`) and exposes helpers
+// that UI components can use to mark lessons complete/incomplete and to compute
+// progress percentages. This is intentionally local-only (fast UI response) —
+// server synchronization happens in background API calls elsewhere when needed.
 const ProgressContext = createContext();
 
 export const useProgress = () => {
@@ -11,18 +16,19 @@ export const useProgress = () => {
 };
 
 export const ProgressProvider = ({ children }) => {
-    // Load progress from localStorage
+    // Load progress from localStorage on first render. Structure is:
+    // { [courseId]: { completedLessons: [lessonId, ...], lastAccessed: ISOString } }
     const [progress, setProgress] = useState(() => {
         const saved = localStorage.getItem('courseProgress');
         return saved ? JSON.parse(saved) : {};
     });
 
-    // Save progress to localStorage whenever it changes
+    // Persist progress to localStorage whenever it changes.
     useEffect(() => {
         localStorage.setItem('courseProgress', JSON.stringify(progress));
     }, [progress]);
 
-    // Mark a lesson as complete
+    // Add a lesson id to the completedLessons list for a course
     const markLessonComplete = (courseId, lessonId) => {
         setProgress(prev => {
             const courseProgress = prev[courseId] || { completedLessons: [] };
@@ -42,7 +48,7 @@ export const ProgressProvider = ({ children }) => {
         });
     };
 
-    // Mark a lesson as incomplete
+    // Remove a lesson id from the completedLessons list
     const markLessonIncomplete = (courseId, lessonId) => {
         setProgress(prev => {
             const courseProgress = prev[courseId] || { completedLessons: [] };
@@ -57,14 +63,14 @@ export const ProgressProvider = ({ children }) => {
         });
     };
 
-    // Check if a lesson is complete
+    // Utility: check if a lesson is marked complete locally
     const isLessonComplete = (courseId, lessonId) => {
         const courseProgress = progress[courseId];
         if (!courseProgress) return false;
         return courseProgress.completedLessons?.includes(lessonId) || false;
     };
 
-    // Get course progress percentage
+    // Compute percentage progress for a course given total lessons count
     const getCourseProgress = (courseId, totalLessons) => {
         const courseProgress = progress[courseId];
         if (!courseProgress || !totalLessons) return 0;
@@ -72,13 +78,11 @@ export const ProgressProvider = ({ children }) => {
         return Math.round((completed / totalLessons) * 100);
     };
 
-    // Get completed lessons count
     const getCompletedLessonsCount = (courseId) => {
         const courseProgress = progress[courseId];
         return courseProgress?.completedLessons?.length || 0;
     };
 
-    // Get all course progress data
     const getAllProgress = () => progress;
 
     const value = {
